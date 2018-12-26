@@ -1,4 +1,4 @@
-package net.jgp.books.sparkWithJava.ch99.lab100.stuffInLab;
+package net.jgp.books.sparkWithJava.ch99.lab100InterestingStuff;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
