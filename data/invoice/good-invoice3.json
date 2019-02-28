@@ -1,0 +1,21 @@
+{
+	"@context": "http://schema.org",
+	"@type": "Invoice",
+	"accountId": "123-456-789",
+	"minimumPaymentDue": {
+		"@type": "PriceSpecification",
+		"price": 70.00,
+		"priceCurrency": "USD"
+	},
+	"paymentDue": "2015-11-22T08:00:00+00:00",
+	"paymentStatus": "PaymentAutomaticallyApplied",
+	"provider": {
+		"@type": "Organization",
+		"name": "Mountain View Utilities"
+	},
+	"totalPaymentDue": {
+		"@type": "PriceSpecification",
+		"price": 70.00,
+		"priceCurrency": "USD"
+	}
+}

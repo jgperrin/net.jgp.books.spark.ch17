@@ -1,0 +1,3 @@
+deptId|dept|budget|emp_json|location
+45|finance|45.567|{ "employee":[{"name":{"firstName":"John","lastName":"Doe"},"address":{"street":"1234 West Broad St","unit":"8505","city":"Columbus"}},{"name":{"firstName":"Alex","lastName":"Messi"},"address":{"street":"4321 North Meecham Rd","unit":"300","city":"Salinas"}}]}|OH
+78|marketing|123.89|{ "employee":[{"name":{"firstName":"Michael","lastName":"Scott"},"address":{"street":"9 East Main St","unit":"007","city":"Miami"}},{"name":{"firstName":"Jane","lastName":"Doe"},"address":{"street":"3 Main St","unit":"#78","city":"Miami"}},{"name":{"firstName":"Sacha","lastName":"Gutierez"},"address":{"street":"314 Great Circle Court","unit":"4590","city":"Fort Lauderdale"}}]}|FL

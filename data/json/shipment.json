@@ -1,0 +1,30 @@
+{
+  "shipmentId": 458922,
+  "date": "2019-10-05",
+  "supplier": {
+    "name": "Manning Publications",
+    "city": "Shelter Island",
+    "state": "New York",
+    "country": "USA"
+  },
+  "customer": {
+    "name": "Jean Georges Perrin",
+    "city": "Chapel Hill",
+    "state": "North Carolina",
+    "country": "USA"
+  },
+  "books": [
+    {
+      "title": "Spark with Java",
+      "qty": 2
+    },
+    {
+      "title": "Spark in Action, 2nd Edition",
+      "qty": 25
+    },
+    {
+      "title": "Spark in Action, 1st Edition",
+      "qty": 1
+    }
+  ]
+}
