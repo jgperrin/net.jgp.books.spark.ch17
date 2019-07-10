@@ -13,8 +13,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
-		<scala.version>2.12</scala.version>
-		<spark.version>2.4.0</spark.version>
+		<scala.version>2.11</scala.version>
+		<spark.version>2.4.3</spark.version>
 		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
 	</properties>
 
@@ -39,19 +39,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-mllib_${scala.version}</artifactId>
-			<version>${spark.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-simple</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>io.delta</groupId>
+			<artifactId>delta-core_${scala.version}</artifactId>
+			<version>0.2.0</version>
 		</dependency>
 
 		<dependency>
