@@ -106,26 +106,30 @@ public class FeedDeltaLakeApp {
             DataTypes.StringType,
             true) });
 
-    // Reads a CSV file with header, called books.csv, stores it in a
+    // Reads a JSON file, called 20190302 EVENTS.json, stores it in a 
     // dataframe
     Dataset<Row> df = spark.read().format("json")
         .schema(schema)
         .option("timestampFormat", "yyyy-MM-dd HH:mm:ss")
         .load("data/france_grand_debat/20190302 EVENTS.json");
 
-    df =df.withColumn("authorZipCode", col("authorZipCode").cast(DataTypes.IntegerType));
+    df = df
+        .withColumn("authorZipCode",
+            col("authorZipCode").cast(DataTypes.IntegerType))
+        .withColumn("authorZipCode",
+            when(col("authorZipCode").$less(1000), null)
+                .otherwise(col("authorZipCode")))
+        .withColumn("authorZipCode",
+            when(col("authorZipCode").$greater$eq(99999), null)
+                .otherwise(col("authorZipCode")))
+        .withColumn("authorDept", expr("int(authorZipCode / 1000)"));
     df.show(25);
     df.printSchema();
-    
-    df = df.groupBy(col("authorZipCode")).count().orderBy(col("authorZipCode").desc());
-
-    // Shows at most 5 rows from the dataframe
-    df.show(25);
-    df.printSchema();
-    System.out.println(df.count());
 
     df.write().format("delta")
         .mode("overwrite")
-        .save("/tmp/delta-events");
+        .save("/tmp/delta_grand_debat_events");
+
+    System.out.println(df.count() + " rows updated.");
   }
 }
