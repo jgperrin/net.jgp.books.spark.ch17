@@ -5,6 +5,9 @@ The examples in this repository are support to the **[Spark in Action, 2nd editi
 Welcome to Spark in Action, 2nd edition, chapter 17. This chapter is about...
 
 
+## Lab #100
+Adapted from one of IBM's [Code for Call starter kit](https://developer.ibm.com/callforcode/starters/water), but leveraging the [wildfires category](https://developer.ibm.com/code-and-response/disasters/wildfires). I will be using 
+
 https://www.data.gouv.fr/en/datasets/donnees-ouvertes-du-grand-debat-national/#_
 
 Populations légales 2016 https://www.insee.fr/fr/statistiques/3677785?sommaire=3677855
