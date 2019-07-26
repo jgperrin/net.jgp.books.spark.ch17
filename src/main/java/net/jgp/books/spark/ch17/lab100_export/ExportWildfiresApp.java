@@ -1,5 +1,14 @@
 package net.jgp.books.spark.ch17.lab100_export;
 
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.expr;
+import static org.apache.spark.sql.functions.from_unixtime;
+import static org.apache.spark.sql.functions.isnull;
+import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.round;
+import static org.apache.spark.sql.functions.unix_timestamp;
+import static org.apache.spark.sql.functions.when;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -8,10 +17,8 @@ import java.nio.channels.ReadableByteChannel;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.types.DataTypes;
-
-import static org.apache.spark.sql.functions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,15 +32,17 @@ public class ExportWildfiresApp {
   }
 
   private boolean start() {
-    if (!downloadWildfiresDatafiles()) {
-      return false;
-    }
+    // if (!downloadWildfiresDatafiles()) {
+    // return false;
+    // }
 
     SparkSession spark = SparkSession.builder()
         .appName("CSV to Dataset")
         .master("local")
         .getOrCreate();
-    Dataset<Row> df = spark.read().format("csv")
+
+    //
+    Dataset<Row> viirsDf = spark.read().format("csv")
         .option("header", true)
         .option("inferSchema", true)
         .load(K.TMP_STORAGE + "/" + K.VIIRS_FILE)
@@ -49,15 +58,93 @@ public class ExportWildfiresApp {
         .drop("acq_time_min")
         .drop("acq_time_hr")
         .drop("acq_time2")
-        .drop("acq_time3");
+        .drop("acq_time3")
+        .withColumnRenamed("confidence", "confidence_level")
+        .withColumn("brightness", lit(null))
+        .withColumn("bright_t31", lit(null));
+    viirsDf.show();
+    viirsDf.printSchema();
+    Dataset<Row> df = viirsDf.groupBy("confidence_level").count();
+    long count = viirsDf.count();
+    df = df.withColumn("%", round(expr("100 / " + count + " * count"), 2));
     df.show();
-    df.printSchema();
+
+    int low = 40;
+    int high = 100;
+    Dataset<Row> modifDf = spark.read().format("csv")
+        .option("header", true)
+        .option("inferSchema", true)
+        .load(K.TMP_STORAGE + "/" + K.MODIS_FILE)
+        .withColumn("acq_time_min", expr("acq_time % 100"))
+        .withColumn("acq_time_hr", expr("int(acq_time / 100)"))
+        .withColumn("acq_time2", unix_timestamp(col("acq_date")))
+        .withColumn(
+            "acq_time3",
+            expr("acq_time2 + acq_time_min * 60 + acq_time_hr * 3600"))
+        .withColumn("acq_datetime", from_unixtime(col("acq_time3")))
+        .drop("acq_date")
+        .drop("acq_time")
+        .drop("acq_time_min")
+        .drop("acq_time_hr")
+        .drop("acq_time2")
+        .drop("acq_time3")
+        .withColumn(
+            "confidence_level",
+            when(col("confidence").$less$eq(low), "low"))
+        .withColumn(
+            "confidence_level",
+            when(
+                col("confidence").$greater(low)
+                    .and(col("confidence").$less(high)),
+                "nominal")
+                    .otherwise(col("confidence_level")))
+        .withColumn(
+            "confidence_level",
+            when(isnull(col("confidence_level")), "high")
+                .otherwise(col("confidence_level")))
+        .drop("confidence")
+        .withColumn("bright_ti4", lit(null))
+        .withColumn("bright_ti5", lit(null));
+    modifDf.show();
+    modifDf.printSchema();
+    df = modifDf.groupBy("confidence_level").count();
+    count = modifDf.count();
+    df = df.withColumn("%", round(expr("100 / " + count + " * count"), 2));
+    df.show();
+
+    Dataset<Row> wildfireDf = viirsDf.unionByName(modifDf);
+    wildfireDf.show();
+    wildfireDf.printSchema();
+
+    log.info("# of partitions: {}", wildfireDf.rdd().getNumPartitions());
+
+    wildfireDf
+        .write()
+        .format("parquet")
+        .mode(SaveMode.Overwrite)
+        .save("/tmp/fires_parquet");
+
+    Dataset<Row> outputDf = wildfireDf
+        .filter("confidence_level = 'high'")
+        .repartition(1);
+    outputDf
+        .write()
+        .format("csv")
+        .option("header", true)
+        .mode(SaveMode.Overwrite)
+        .save("/tmp/high_confidence_fires_csv");
 
     return true;
   }
 
+  /**
+   * Download all data sources.
+   * 
+   * @return
+   */
   private boolean downloadWildfiresDatafiles() {
     log.trace("-> downloadWildfiresDatafiles()");
+    // Download the MODIS data file
     String fromFile =
         "https://firms.modaps.eosdis.nasa.gov/data/active_fire/c6/csv/"
             + K.MODIS_FILE;
@@ -67,6 +154,7 @@ public class ExportWildfiresApp {
       return false;
     }
 
+    // Download the VIIRS data file
     fromFile =
         "https://firms.modaps.eosdis.nasa.gov/data/active_fire/viirs/csv/"
             + K.VIIRS_FILE;
@@ -78,6 +166,13 @@ public class ExportWildfiresApp {
     return true;
   }
 
+  /**
+   * Downloads data files to local temp value.
+   * 
+   * @param fromFile
+   * @param toFile
+   * @return
+   */
   private boolean download(String fromFile, String toFile) {
     try {
       URL website = new URL(fromFile);
@@ -90,12 +185,9 @@ public class ExportWildfiresApp {
       log.debug("Error while downloading '{}', got: {}", fromFile,
           e.getMessage(), e);
       return false;
-    } finally {
-
     }
 
     log.debug("{} downloaded successfully.", toFile);
     return true;
   }
-
 }
