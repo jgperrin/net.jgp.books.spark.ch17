@@ -16,6 +16,8 @@
 		<scala.version>2.11</scala.version>
 		<spark.version>2.4.3</spark.version>
 		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+		<!-- Only used for lab #900 -->
+		<postgresql.version>42.1.4</postgresql.version>
 	</properties>
 
 	<dependencies>
@@ -45,6 +47,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${postgresql.version}</version>
+		</dependency>
+		
+				<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>

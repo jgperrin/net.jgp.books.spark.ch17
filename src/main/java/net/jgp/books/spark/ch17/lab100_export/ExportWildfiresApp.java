@@ -32,16 +32,16 @@ public class ExportWildfiresApp {
   }
 
   private boolean start() {
-    // if (!downloadWildfiresDatafiles()) {
-    // return false;
-    // }
+    if (!downloadWildfiresDatafiles()) {
+      return false;
+    }
 
     SparkSession spark = SparkSession.builder()
         .appName("CSV to Dataset")
         .master("local")
         .getOrCreate();
 
-    //
+    // Format the VIIRS dataset
     Dataset<Row> viirsDf = spark.read().format("csv")
         .option("header", true)
         .option("inferSchema", true)
@@ -64,14 +64,19 @@ public class ExportWildfiresApp {
         .withColumn("bright_t31", lit(null));
     viirsDf.show();
     viirsDf.printSchema();
+    
+    // This piece of code shows the repartition by confidence level, so you
+    // can compare when you convert the confidence as a % to a level for the
+    // MODIS dataset.
     Dataset<Row> df = viirsDf.groupBy("confidence_level").count();
     long count = viirsDf.count();
     df = df.withColumn("%", round(expr("100 / " + count + " * count"), 2));
     df.show();
 
+    // Format the MODIF dataset
     int low = 40;
     int high = 100;
-    Dataset<Row> modifDf = spark.read().format("csv")
+    Dataset<Row> modisDf = spark.read().format("csv")
         .option("header", true)
         .option("inferSchema", true)
         .load(K.TMP_STORAGE + "/" + K.MODIS_FILE)
@@ -105,14 +110,18 @@ public class ExportWildfiresApp {
         .drop("confidence")
         .withColumn("bright_ti4", lit(null))
         .withColumn("bright_ti5", lit(null));
-    modifDf.show();
-    modifDf.printSchema();
-    df = modifDf.groupBy("confidence_level").count();
-    count = modifDf.count();
+    modisDf.show();
+    modisDf.printSchema();
+    
+    // This piece of code shows the repartition by confidence level, so you
+    // can compare when you convert the confidence as a % to a level for the
+    // MODIS dataset.
+    df = modisDf.groupBy("confidence_level").count();
+    count = modisDf.count();
     df = df.withColumn("%", round(expr("100 / " + count + " * count"), 2));
     df.show();
 
-    Dataset<Row> wildfireDf = viirsDf.unionByName(modifDf);
+    Dataset<Row> wildfireDf = viirsDf.unionByName(modisDf);
     wildfireDf.show();
     wildfireDf.printSchema();
 
