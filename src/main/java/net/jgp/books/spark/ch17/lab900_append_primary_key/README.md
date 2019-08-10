@@ -2,20 +2,20 @@
 This example is assuming you have a PostgreSQL table matching this schema:
 
 ```sql 
-CREATE TABLE public.ch19_lab900_pkey
+CREATE TABLE public.ch17_lab900_pkey
 (
     fname text COLLATE pg_catalog."default" NOT NULL,
     lname text COLLATE pg_catalog."default" NOT NULL,
     id integer NOT NULL,
     score integer NOT NULL,
-    CONSTRAINT ch19_lab900_pkey_pkey PRIMARY KEY (id)
+    CONSTRAINT ch17_lab900_pkey_pkey PRIMARY KEY (id)
 )
 WITH (
     OIDS = FALSE
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.ch19_lab900_pkey
+ALTER TABLE public.ch17_lab900_pkey
     OWNER to jgp;
 ```  
 
