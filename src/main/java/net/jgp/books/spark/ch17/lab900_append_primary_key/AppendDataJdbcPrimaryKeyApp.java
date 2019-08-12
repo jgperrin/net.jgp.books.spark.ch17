@@ -31,12 +31,12 @@ public class AppendDataJdbcPrimaryKeyApp {
     Dataset<Row> df = createDataframe(spark);
     df.show(false);
 
-    // Write in a table called ch19_lab900_pkey
+    // Write in a table called ch17_lab900_pkey
     df.write()
         .mode(SaveMode.Append)
         .format("jdbc")
         .option("url", "jdbc:postgresql://localhost/spark_labs")
-        .option("dbtable", "ch19_lab900_pkey")
+        .option("dbtable", "ch17_lab900_pkey")
         .option("driver", "org.postgresql.Driver")
         .option("user", "jgp")
         .option("password", "Spark<3Java")
