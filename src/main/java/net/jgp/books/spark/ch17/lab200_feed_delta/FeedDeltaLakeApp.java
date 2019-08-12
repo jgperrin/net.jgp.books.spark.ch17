@@ -1,6 +1,8 @@
 package net.jgp.books.spark.ch17.lab200_feed_delta;
 
-import static org.apache.spark.sql.functions.*;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.expr;
+import static org.apache.spark.sql.functions.when;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -10,9 +12,7 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
 /**
- * JSON Lines ingestion in a dataframe.
- * 
- * For more details about the JSON Lines format, see: http://jsonlines.org/.
+ * Ingestion the 'Grand Débat' files to Delta Lake.
  * 
  * @author jgp
  */
@@ -33,13 +33,13 @@ public class FeedDeltaLakeApp {
    * The processing code.
    */
   private void start() {
-    // Creates a session on a local master
+    // Create a session on a local master
     SparkSession spark = SparkSession.builder()
-        .appName("JSON Lines to Dataframe")
+        .appName("Ingestion the 'Grand Débat' files to Delta Lake")
         .master("local[*]")
         .getOrCreate();
 
-    // Creates the schema
+    // Create the schema
     StructType schema = DataTypes.createStructType(new StructField[] {
         DataTypes.createStructField(
             "authorId",
@@ -106,7 +106,7 @@ public class FeedDeltaLakeApp {
             DataTypes.StringType,
             true) });
 
-    // Reads a JSON file, called 20190302 EVENTS.json, stores it in a 
+    // Reads a JSON file, called 20190302 EVENTS.json, stores it in a
     // dataframe
     Dataset<Row> df = spark.read().format("json")
         .schema(schema)

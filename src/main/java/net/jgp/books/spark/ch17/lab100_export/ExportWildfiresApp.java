@@ -37,8 +37,8 @@ public class ExportWildfiresApp {
     }
 
     SparkSession spark = SparkSession.builder()
-        .appName("CSV to Dataset")
-        .master("local")
+        .appName("Wildfire data pipeline")
+        .master("local[*]")
         .getOrCreate();
 
     // Format the VIIRS dataset

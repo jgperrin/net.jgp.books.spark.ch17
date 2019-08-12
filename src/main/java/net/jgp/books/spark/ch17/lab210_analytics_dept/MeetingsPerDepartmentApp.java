@@ -20,7 +20,7 @@ public class MeetingsPerDepartmentApp {
   private void start() {
     // Creates a session on a local master
     SparkSession spark = SparkSession.builder()
-        .appName("JSON Lines to Dataframe")
+        .appName("Counting the number of meetings per department")
         .master("local[*]")
         .getOrCreate();
 
