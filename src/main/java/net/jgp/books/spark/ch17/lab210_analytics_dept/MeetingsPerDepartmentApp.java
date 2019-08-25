@@ -27,7 +27,6 @@ public class MeetingsPerDepartmentApp {
     Dataset<Row> df = spark.read().format("delta")
         .load("/tmp/delta_grand_debat_events");
 
-
     df = df.groupBy(col("authorDept")).count()
         .orderBy(col("count").desc_nulls_first());
 

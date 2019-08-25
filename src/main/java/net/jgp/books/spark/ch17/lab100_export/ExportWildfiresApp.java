@@ -64,7 +64,7 @@ public class ExportWildfiresApp {
         .withColumn("bright_t31", lit(null));
     viirsDf.show();
     viirsDf.printSchema();
-    
+
     // This piece of code shows the repartition by confidence level, so you
     // can compare when you convert the confidence as a % to a level for the
     // MODIS dataset.
@@ -112,7 +112,7 @@ public class ExportWildfiresApp {
         .withColumn("bright_ti5", lit(null));
     modisDf.show();
     modisDf.printSchema();
-    
+
     // This piece of code shows the repartition by confidence level, so you
     // can compare when you convert the confidence as a % to a level for the
     // MODIS dataset.
