@@ -36,7 +36,7 @@ Dataset(s) used in this chapter:
 ## Notes
 
  1. Due to renaming the packages to match more closely Java standards, this project is not in sync with the book's MEAP prior to v10 (published in April 2019).
- 2. As of MEAP v14, we have introduced Scala and Python examples (published in October 2019).
+ 2. As of MEAP v14, we have introduced Scala and Python examples (published in October 2019). All examples are in Java. Examples in Python and Scala are coming.
  
 ---
 
