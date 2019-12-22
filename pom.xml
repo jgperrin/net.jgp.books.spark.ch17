@@ -13,9 +13,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.8</java.version>
-    <scala.version>2.11</scala.version>
+    <scala.version>2.12</scala.version>
     <spark.version>2.4.4</spark.version>
-    <delta.version>0.4.0</delta.version>
+    <delta.version>0.5.0</delta.version>
     <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
 
     <!-- Only used for lab #900 -->
