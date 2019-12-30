@@ -12,6 +12,15 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
+/**
+ * Appends content of a dataframe to a PostgreSQL database.
+ * 
+ * Check for additional information in the README.md file in the same
+ * repository.
+ * 
+ * @author jgp
+ *
+ */
 public class AppendDataJdbcPrimaryKeyApp {
 
   public static void main(String[] args) {
