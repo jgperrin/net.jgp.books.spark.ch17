@@ -27,7 +27,8 @@ public class ExportWildfiresToElasticsearchApp {
       LoggerFactory.getLogger(ExportWildfiresToElasticsearchApp.class);
 
   public static void main(String[] args) {
-    ExportWildfiresToElasticsearchApp app = new ExportWildfiresToElasticsearchApp();
+    ExportWildfiresToElasticsearchApp app =
+        new ExportWildfiresToElasticsearchApp();
     app.start();
   }
 
