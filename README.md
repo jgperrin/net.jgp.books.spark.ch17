@@ -2,7 +2,7 @@ This repository contains the Java labs as well as their Scala and Python ports o
 
 ---
 
-# Spark in Action, 2nd edition – Java, Python, and Scala code for chapter 14
+# Spark in Action, 2nd edition – Java, Python, and Scala code for chapter 17
 
 Chapter 17 is about exporting data.
 
