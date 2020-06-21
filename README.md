@@ -6,6 +6,10 @@ This repository contains the Java labs as well as their Scala and Python ports o
 
 Chapter 17 is about exporting data.
 
+This code is designed to work with:
+ * Apache Spark v3.0.0.
+ * Delta Lake v0.7.0.
+
 ## Labs
 
 ### Lab \#100
@@ -15,7 +19,7 @@ Adapted from one of IBM's [Code for Call starter kit](https://developer.ibm.com/
 Feeds data into Delta Lake.
 
 ### Lab \#210, \#220
-Run analytics on dta stored in Delta Lake.
+Run analytics on data stored in Delta Lake.
 
 ### Lab \#250
 Feeds data into Delta Lake.
