@@ -6,6 +6,8 @@ This repository contains the Java labs as well as their Scala and Python ports o
 
 Chapter 17 is about exporting data.
 
+This code is designed to work with Apache Spark v2.4.4.
+
 ## Labs
 
 ### Lab \#100
