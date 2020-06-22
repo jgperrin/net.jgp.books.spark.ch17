@@ -3,9 +3,9 @@
 
  @author rambabu.posa
 """
-from pyspark.sql import (SparkSession, functions as F)
 import logging
 import requests
+from pyspark.sql import (SparkSession, functions as F)
 
 modis_file = "MODIS_C6_Global_24h.csv"
 viirs_file = "VNP14IMGTDL_NRT_Global_24h.csv"
@@ -30,90 +30,97 @@ def downloadWildfiresDatafiles():
         if not download(fromFile, toFile): return False
         return True
 
-downloadWildfiresDatafiles()
+def main(saprk):
+        # Format the VIIRS dataset
+        viirsDf = spark.read \
+                .format("csv") \
+                .option("header", True) \
+                .option("inferSchema", True) \
+                .load("/tmp/{}".format(viirs_file))
 
-# Creates a session on a local master
-spark = SparkSession.builder.appName("Wildfire data pipeline") \
-    .master("local[*]").getOrCreate()
+        viirsDf2 = viirsDf \
+                .withColumn("acq_time_min", F.expr("acq_time % 100")) \
+                .withColumn("acq_time_hr", F.expr("int(acq_time / 100)")) \
+                .withColumn("acq_time2", F.unix_timestamp(F.col("acq_date"))) \
+                .withColumn("acq_time3", F.expr("acq_time2 + acq_time_min * 60 + acq_time_hr * 3600")) \
+                .withColumn("acq_datetime", F.from_unixtime(F.col("acq_time3"))) \
+                .drop("acq_date", "acq_time", "acq_time_min", "acq_time_hr", "acq_time2", "acq_time3") \
+                .withColumnRenamed("confidence", "confidence_level") \
+                .withColumn("brightness", F.lit(None)) \
+                .withColumn("bright_t31", F.lit(None))
 
-# Format the VIIRS dataset
-viirsDf = spark.read \
-        .format("csv") \
-        .option("header", True) \
-        .option("inferSchema", True) \
-        .load("/tmp/{}".format(viirs_file))
+        viirsDf2.show()
+        viirsDf2.printSchema()
 
-viirsDf2 = viirsDf \
-        .withColumn("acq_time_min", F.expr("acq_time % 100")) \
-        .withColumn("acq_time_hr", F.expr("int(acq_time / 100)")) \
-        .withColumn("acq_time2", F.unix_timestamp(F.col("acq_date"))) \
-        .withColumn("acq_time3", F.expr("acq_time2 + acq_time_min * 60 + acq_time_hr * 3600")) \
-        .withColumn("acq_datetime", F.from_unixtime(F.col("acq_time3"))) \
-        .drop("acq_date", "acq_time", "acq_time_min", "acq_time_hr", "acq_time2", "acq_time3") \
-        .withColumnRenamed("confidence", "confidence_level") \
-        .withColumn("brightness", F.lit(None)) \
-        .withColumn("bright_t31", F.lit(None))
+        # This piece of code shows the repartition by confidence level, so you
+        # can compare when you convert the confidence as a % to a level for the
+        # MODIS dataset.
+        df = viirsDf2.groupBy("confidence_level").count()
+        count = viirsDf2.count()
+        df = df.withColumn("%", F.round(F.expr("100 / {} * count".format(count)), 2))
+        df.show()
 
-viirsDf2.show()
-viirsDf2.printSchema()
+        # Format the MODIS dataset
+        low = 40
+        high = 100
 
-# This piece of code shows the repartition by confidence level, so you
-# can compare when you convert the confidence as a % to a level for the
-# MODIS dataset.
-df = viirsDf2.groupBy("confidence_level").count()
-count = viirsDf2.count()
-df = df.withColumn("%", F.round(F.expr("100 / {} * count".format(count)), 2))
-df.show()
+        modisDf = spark.read.format("csv") \
+                .option("header", True) \
+                .option("inferSchema", True) \
+                .load("/tmp/{}".format(modis_file)) \
+                .withColumn("acq_time_min", F.expr("acq_time % 100")) \
+                .withColumn("acq_time_hr", F.expr("int(acq_time / 100)")) \
+                .withColumn("acq_time2", F.unix_timestamp(F.col("acq_date"))) \
+                .withColumn("acq_time3", F.expr("acq_time2 + acq_time_min * 60 + acq_time_hr * 3600")) \
+                .withColumn("acq_datetime", F.from_unixtime(F.col("acq_time3"))) \
+                .drop("acq_date", "acq_time", "acq_time_min", "acq_time_hr", "acq_time2", "acq_time3") \
+                .withColumn("confidence_level", F.when(F.col("confidence") <= F.lit(low), "low")
+                            .when((F.col("confidence") > F.lit(low)) & (F.col("confidence") < F.lit(high)), "nominal")
+                            .when(F.isnull(F.col("confidence")), "high")
+                            .otherwise(F.col("confidence"))) \
+                .drop("confidence") \
+                .withColumn("bright_ti4", F.lit(None)) \
+                .withColumn("bright_ti5", F.lit(None))
 
-# Format the MODIS dataset
-low = 40
-high = 100
+        modisDf.show()
+        modisDf.printSchema()
 
-modisDf = spark.read.format("csv") \
-        .option("header", True) \
-        .option("inferSchema", True) \
-        .load("/tmp/{}".format(modis_file)) \
-        .withColumn("acq_time_min", F.expr("acq_time % 100")) \
-        .withColumn("acq_time_hr", F.expr("int(acq_time / 100)")) \
-        .withColumn("acq_time2", F.unix_timestamp(F.col("acq_date"))) \
-        .withColumn("acq_time3", F.expr("acq_time2 + acq_time_min * 60 + acq_time_hr * 3600")) \
-        .withColumn("acq_datetime", F.from_unixtime(F.col("acq_time3"))) \
-        .drop("acq_date", "acq_time", "acq_time_min", "acq_time_hr", "acq_time2", "acq_time3") \
-        .withColumn("confidence_level", F.when(F.col("confidence") <= F.lit(low), "low")
-                    .when((F.col("confidence") > F.lit(low)) & (F.col("confidence") < F.lit(high)), "nominal")
-                    .when(F.isnull(F.col("confidence")), "high")
-                    .otherwise(F.col("confidence"))) \
-        .drop("confidence") \
-        .withColumn("bright_ti4", F.lit(None)) \
-        .withColumn("bright_ti5", F.lit(None))
+        # This piece of code shows the repartition by confidence level, so you
+        # can compare when you convert the confidence as a % to a level for the
+        # MODIS dataset.
+        df = modisDf.groupBy("confidence_level").count()
+        count = modisDf.count()
+        df = df.withColumn("%", F.round(F.expr("100 / {} * count".format(count)), 2))
+        df.show()
 
-modisDf.show()
-modisDf.printSchema()
+        wildfireDf = viirsDf2.unionByName(modisDf)
+        wildfireDf.show()
+        wildfireDf.printSchema()
 
-# This piece of code shows the repartition by confidence level, so you
-# can compare when you convert the confidence as a % to a level for the
-# MODIS dataset.
-df = modisDf.groupBy("confidence_level").count()
-count = modisDf.count()
-df = df.withColumn("%", F.round(F.expr("100 / {} * count".format(count)), 2))
-df.show()
+        logging.info("# of partitions: {}".format(wildfireDf.rdd.getNumPartitions()))
 
-wildfireDf = viirsDf2.unionByName(modisDf)
-wildfireDf.show()
-wildfireDf.printSchema()
+        wildfireDf.write.format("parquet") \
+                .mode("overwrite") \
+                .save("/tmp/fires_parquet")
 
-logging.info("# of partitions: {}".format(wildfireDf.rdd.getNumPartitions()))
+        outputDf = wildfireDf.filter("confidence_level = 'high'") \
+         .repartition(1)
 
-wildfireDf.write.format("parquet") \
-        .mode("overwrite") \
-        .save("/tmp/fires_parquet")
+        outputDf.write.format("csv") \
+                .option("header", True) \
+                .mode("overwrite") \
+                .save("/tmp/high_confidence_fires_csv")
 
-outputDf = wildfireDf.filter("confidence_level = 'high'") \
- .repartition(1)
+if __name__ == "__main__":
+        # Creates a session on a local master
+        spark = SparkSession.builder.appName("Wildfire data pipeline") \
+                .master("local[*]").getOrCreate()
 
-outputDf.write.format("csv") \
-        .option("header", True) \
-        .mode("overwrite") \
-        .save("/tmp/high_confidence_fires_csv")
+        # setting log level, update this as per your requirement
+        spark.sparkContext.setLogLevel("warn")
 
-spark.stop()
+        # download required datasets from internet
+        downloadWildfiresDatafiles()
+
+        main(spark)
+        spark.stop()

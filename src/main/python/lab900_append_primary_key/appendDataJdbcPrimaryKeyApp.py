@@ -5,7 +5,8 @@
   @author rambabu.posa
 """
 from pyspark.sql import SparkSession
-from pyspark.sql.types import (StructType, StructField, StringType,IntegerType)
+from pyspark.sql.types import (StructType, StructField,
+                               StringType,IntegerType)
 
 def createDataframe(spark):
     # Create the schema
@@ -22,25 +23,30 @@ def createDataframe(spark):
     ]
     return spark.createDataFrame(data, schema)
 
+def main(spark):
+    df = createDataframe(spark)
+    df.show(truncate=False)
 
-# Creates a session on a local master
-spark = SparkSession.builder \
-    .appName("Addition") \
-    .master("local[*]").getOrCreate()
+    # Write in a table called ch17_lab900_pkey
+    df.write.mode("append") \
+        .format("jdbc") \
+        .option("url", "jdbc:postgresql://localhost/spark_labs") \
+        .option("dbtable", "ch17_lab900_pkey") \
+        .option("driver", "org.postgresql.Driver") \
+        .option("user", "jgp") \
+        .option("password", "Spark<3Java") \
+        .save()
 
-df = createDataframe(spark)
-df.show(truncate = False)
+if __name__ == "__main__":
+    # Creates a session on a local master
+    spark = SparkSession.builder \
+        .appName("Addition") \
+        .master("local[*]").getOrCreate()
 
-# Write in a table called ch17_lab900_pkey
-df.write.mode("append") \
-    .format("jdbc") \
-    .option("url", "jdbc:postgresql://localhost/spark_labs") \
-    .option("dbtable", "ch17_lab900_pkey") \
-    .option("driver", "org.postgresql.Driver") \
-    .option("user", "jgp") \
-    .option("password", "Spark<3Java") \
-    .save()
+    # setting log level, update this as per your requirement
+    spark.sparkContext.setLogLevel("warn")
 
-spark.stop()
+    main(spark)
+    spark.stop()
 
 

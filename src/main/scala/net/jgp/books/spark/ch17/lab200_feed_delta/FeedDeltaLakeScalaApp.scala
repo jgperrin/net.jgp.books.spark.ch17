@@ -25,7 +25,7 @@ object FeedDeltaLakeScalaApp {
     val spark: SparkSession = SparkSession.builder
       .appName("Ingestion the 'Grand Débat' files to Delta Lake")
       // To use Databricks Delta Lake, we should add delta core packages to SparkSession
-      .config("spark.jars.packages", "io.delta:delta-core_2.11:0.6.0")
+      .config("spark.jars.packages", "io.delta:delta-core_2.12:0.7.0")
       .master("local[*]")
       .getOrCreate
 

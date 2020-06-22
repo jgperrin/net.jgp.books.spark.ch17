@@ -56,9 +56,8 @@ class ExportWildfiresScalaApp {
     // This piece of code shows the repartition by confidence level, so you
     // can compare when you convert the confidence as a % to a level for the
     // MODIS dataset.
-    // TODO: chnage var
     var df = viirsDf2.groupBy("confidence_level").count
-    var count = viirsDf2.count
+    val count = viirsDf2.count
     df = df.withColumn("%", round(expr("100 / " + count + " * count"), 2))
     df.show()
 
@@ -96,8 +95,8 @@ class ExportWildfiresScalaApp {
     // can compare when you convert the confidence as a % to a level for the
     // MODIS dataset.
     df = modisDf.groupBy("confidence_level").count
-    count = modisDf.count
-    df = df.withColumn("%", round(expr("100 / " + count + " * count"), 2))
+    val count2 = modisDf.count
+    df = df.withColumn("%", round(expr("100 / " + count2 + " * count"), 2))
     df.show()
 
     val wildfireDf = viirsDf2.unionByName(modisDf)
@@ -129,13 +128,13 @@ class ExportWildfiresScalaApp {
   private def downloadWildfiresDatafiles(): Boolean = {
     log.trace("-> downloadWildfiresDatafiles()")
     // Download the MODIS data file
-    var fromFile = "https://firms.modaps.eosdis.nasa.gov/data/active_fire/c6/csv/" + Modis_File
-    var toFile = Tmp_Storage + "/" + Modis_File
+    val fromFile = "https://firms.modaps.eosdis.nasa.gov/data/active_fire/c6/csv/" + Modis_File
+    val toFile = Tmp_Storage + "/" + Modis_File
     if (!download(fromFile, toFile)) return false
     // Download the VIIRS data file
-    fromFile = "https://firms.modaps.eosdis.nasa.gov/data/active_fire/viirs/csv/" + Viirs_File
-    toFile = Tmp_Storage + "/" + Viirs_File
-    if (!download(fromFile, toFile)) return false
+    val fromFile2 = "https://firms.modaps.eosdis.nasa.gov/data/active_fire/viirs/csv/" + Viirs_File
+    val toFile2 = Tmp_Storage + "/" + Viirs_File
+    if (!download(fromFile2, toFile2)) return false
     true
   }
 

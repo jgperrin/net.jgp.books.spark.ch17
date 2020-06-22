@@ -25,19 +25,19 @@ object FeedFrancePopDeltaLakeScalaApp {
     val spark: SparkSession = SparkSession.builder
       .appName("Load France's population dataset and store it in Delta")
       // To use Databricks Delta Lake, we should add delta core packages to SparkSession
-      .config("spark.jars.packages", "io.delta:delta-core_2.11:0.6.0")
+      .config("spark.jars.packages", "io.delta:delta-core_2.12:0.7.0")
       .master("local[*]")
       .getOrCreate
 
     // Reads a CSV file, called population_dept.csv, stores it in a
     // dataframe
-    var df: Dataset[Row] = spark.read
+    val df: Dataset[Row] = spark.read
       .format("csv")
       .option("inferSchema", true)
       .option("header", true)
       .load("data/france_population_dept/population_dept.csv")
 
-    df = df
+   val df2 = df
       .withColumn("Code département",
         when(col("Code département").$eq$eq$eq("2A"), "20")
           .otherwise(col("Code département")))
@@ -56,15 +56,15 @@ object FeedFrancePopDeltaLakeScalaApp {
         col("Population totale").cast(DataTypes.IntegerType))
       .drop("_c9")
 
-    df.show(25)
-    df.printSchema()
+    df2.show(25)
+    df2.printSchema()
 
-    df.write
+    df2.write
       .format("delta")
       .mode("overwrite")
       .save("/tmp/delta_france_population")
 
-    println(s"${df.count} rows updated.")
+    println(s"${df2.count} rows updated.")
 
     spark.stop
   }

@@ -1,7 +1,6 @@
 package net.jgp.books.spark.ch17.lab900_append_primary_key
 
 import java.util.ArrayList
-
 import org.apache.spark.sql.types.{DataTypes, StructField, StructType}
 import org.apache.spark.sql._
 
