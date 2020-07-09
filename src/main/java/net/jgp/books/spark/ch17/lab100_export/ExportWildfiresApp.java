@@ -49,6 +49,7 @@ public class ExportWildfiresApp {
         .load(K.TMP_STORAGE + "/" + K.VIIRS_FILE)
         .withColumn("acq_time_min", expr("acq_time % 100"))
         .withColumn("acq_time_hr", expr("int(acq_time / 100)"))
+        // change from the book: to have a proper type in the schema
         .withColumn("acq_time2", unix_timestamp(col("acq_date").cast(DataTypes.DateType)))
         .withColumn(
             "acq_time3",
@@ -83,6 +84,7 @@ public class ExportWildfiresApp {
         .load(K.TMP_STORAGE + "/" + K.MODIS_FILE)
         .withColumn("acq_time_min", expr("acq_time % 100"))
         .withColumn("acq_time_hr", expr("int(acq_time / 100)"))
+        // change from the book: to have a proper type in the schema
         .withColumn("acq_time2", unix_timestamp(col("acq_date").cast(DataTypes.DateType)))
         .withColumn(
             "acq_time3",
