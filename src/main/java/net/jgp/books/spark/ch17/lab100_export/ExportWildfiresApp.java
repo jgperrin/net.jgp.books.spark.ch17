@@ -19,6 +19,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public class ExportWildfiresApp {
         .load(K.TMP_STORAGE + "/" + K.VIIRS_FILE)
         .withColumn("acq_time_min", expr("acq_time % 100"))
         .withColumn("acq_time_hr", expr("int(acq_time / 100)"))
-        .withColumn("acq_time2", unix_timestamp(col("acq_date")))
+        .withColumn("acq_time2", unix_timestamp(col("acq_date").cast(DataTypes.DateType)))
         .withColumn(
             "acq_time3",
             expr("acq_time2 + acq_time_min * 60 + acq_time_hr * 3600"))
@@ -82,7 +83,7 @@ public class ExportWildfiresApp {
         .load(K.TMP_STORAGE + "/" + K.MODIS_FILE)
         .withColumn("acq_time_min", expr("acq_time % 100"))
         .withColumn("acq_time_hr", expr("int(acq_time / 100)"))
-        .withColumn("acq_time2", unix_timestamp(col("acq_date")))
+        .withColumn("acq_time2", unix_timestamp(col("acq_date").cast(DataTypes.DateType)))
         .withColumn(
             "acq_time3",
             expr("acq_time2 + acq_time_min * 60 + acq_time_hr * 3600"))
